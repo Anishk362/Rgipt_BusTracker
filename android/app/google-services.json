@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "948057126066",
+    "project_id": "bus-karo-e60c0",
+    "storage_bucket": "bus-karo-e60c0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:948057126066:android:d5f063adcffbe81f6785ab",
+        "android_client_info": {
+          "package_name": "com.example.bus_karo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkeFILJ3eFhG1yXcGLP99o0W66n9qbvjQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
