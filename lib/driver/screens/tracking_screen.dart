@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/tracking_service.dart'; // Notice the ".." to go up one folder
+import 'package:flutter_background_service/flutter_background_service.dart';
+
 
 class TrackingScreen extends StatefulWidget {
   const TrackingScreen({super.key});
@@ -9,22 +10,54 @@ class TrackingScreen extends StatefulWidget {
 }
 
 class _TrackingScreenState extends State<TrackingScreen> {
-  final TrackingService _trackingService = TrackingService();
   bool _isTracking = false;
   String _statusText = "Offline";
 
-  void _toggleTracking() {
-    setState(() {
-      if (_isTracking) {
-        _trackingService.stopBroadcasting('bus_001');
-        _isTracking = false;
-        _statusText = "Offline 🛑";
-      } else {
-        _trackingService.startBroadcasting('bus_001');
+  @override
+  void initState() {
+    super.initState();
+    // Check status immediately when screen opens
+    _checkServiceStatus();
+  }
+
+  void _checkServiceStatus() async {
+    final service = FlutterBackgroundService();
+    var isRunning = await service.isRunning();
+    if (isRunning) {
+      setState(() {
         _isTracking = true;
         _statusText = "Broadcasting Location 📡";
-      }
-    });
+      });
+    } else {
+      setState(() {
+        _isTracking = false;
+        _statusText = "Offline";
+      });
+    }
+  }
+
+  void _toggleTracking() async {
+    final service = FlutterBackgroundService();
+
+    if (_isTracking) {
+      // --- STOP LOGIC ---
+      service.invoke("stopService");
+      
+      setState(() {
+        _isTracking = false;
+        _statusText = "Offline 🛑";
+      });
+    } else {
+      // --- START LOGIC ---
+      // We do NOT call initializeService() here anymore. It's in main.dart.
+      
+      service.startService(); // <--- This wakes up the service
+
+      setState(() {
+        _isTracking = true;
+        _statusText = "Broadcasting Location 📡";
+      });
+    }
   }
 
   @override
@@ -45,14 +78,19 @@ class _TrackingScreenState extends State<TrackingScreen> {
             const SizedBox(height: 50),
             GestureDetector(
               onTap: _toggleTracking,
-              child: Container(
+              child: AnimatedContainer( // Added animation for smoother feel
+                duration: const Duration(milliseconds: 300),
                 height: 150,
                 width: 150,
                 decoration: BoxDecoration(
                   color: _isTracking ? Colors.red : Colors.green,
                   shape: BoxShape.circle,
                   boxShadow: [
-                    BoxShadow(blurRadius: 10, color: Colors.black26)
+                    BoxShadow(
+                      blurRadius: 10, 
+                      color: _isTracking ? Colors.redAccent.withOpacity(0.4) : Colors.greenAccent.withOpacity(0.4),
+                      spreadRadius: 5,
+                    )
                   ],
                 ),
                 child: Icon(
@@ -63,7 +101,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            Text(_isTracking ? "Tap to Stop" : "Tap to Start"),
+            Text(
+              _isTracking ? "Tap to Stop Trip" : "Tap to Start Trip",
+              style: const TextStyle(fontSize: 16),
+            ),
           ],
         ),
       ),
