@@ -3,12 +3,32 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'driver/driver_home.dart';
 import 'student/student_home.dart';
+import 'driver/services/background_service.dart';
+import 'package:permission_handler/permission_handler.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // 1. ASK FOR PERMISSIONS (This fixes the "Unused Import" warning)
+  await Permission.notification.isDenied.then((value) {
+    if (value) {
+      Permission.notification.request();
+    }
+  });
+  
+  await Permission.locationAlways.isDenied.then((value) {
+    if (value) {
+      Permission.locationAlways.request();
+    }
+  });
+
+  // 2. Initialize Service
+  await initializeService(); 
+
   runApp(const MyApp());
 }
 
@@ -24,7 +44,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const SelectionScreen(), // We start here now!
+      home: const SelectionScreen(), 
     );
   }
 }
@@ -40,7 +60,6 @@ class SelectionScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Driver Button
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
@@ -54,9 +73,7 @@ class SelectionScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
               ),
             ),
-            const SizedBox(height: 30), // Gap
-            
-            // Student Button
+            const SizedBox(height: 30),
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
